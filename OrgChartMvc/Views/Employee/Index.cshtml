@@ -1,0 +1,70 @@
+﻿
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <link href="~/Scripts/getorgchart.css" rel="stylesheet" />
+    <script src="~/Scripts/getorgchart.js"></script>
+    
+    <style type="text/css">
+        html, body {
+            margin: 0px;
+            padding: 0px;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        #people {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="people"></div>
+
+    <script type="text/javascript">
+        var readUrl = "@Url.Action("Read")";
+        var removeUrl = "@Url.Action("Remove")";
+        var updateUrl = "@Url.Action("Update")";
+        var insertUrl = "@Url.Action("Insert")";
+
+        var orgChart;
+
+        $.getJSON(readUrl, function (data) {
+            orgChart = new getOrgChart(document.getElementById("people"), {
+                primaryColumns: ["Name", "Title"],
+                imageColumn: "PhotoUrl",
+                removeNodeEvent: removeNodeEventHandler,
+                updateNodeEvent: updateNodeEventHandler,
+                insertNodeEvent: insertNodeEventHandler,
+                dataSource: data
+            });
+        });
+
+        function removeNodeEventHandler(sender, args) {
+            $.getJSON(removeUrl + "?id="+  args.id);
+        }
+
+        function updateNodeEventHandler(sender, args) {
+            var postData = $.extend(true, { Id: args.node.id, ParentId: args.node.pid }, args.node.data);
+            var params = $.param(postData);
+            $.getJSON(updateUrl + "?" + params);
+        }
+
+        function insertNodeEventHandler(sender, args) {
+            var id = "1";
+            while (orgChart.nodes[id]) {
+                id++;
+            }
+            var postData = $.extend(true, { Id: id, ParentId: args.node.pid }, args.node.data);
+            var params = $.param(postData);
+            $.getJSON(insertUrl + "?" + params);
+        }
+    </script>
+
+</body>
+</html>
+
+
