@@ -26,41 +26,39 @@
 
     <script type="text/javascript">
         var readUrl = "@Url.Action("Read")";
-        var removeUrl = "@Url.Action("Remove")";
         var updateUrl = "@Url.Action("Update")";
-        var insertUrl = "@Url.Action("Insert")";
 
-        var orgChart;
 
-        $.getJSON(readUrl, function (data) {
-            orgChart = new getOrgChart(document.getElementById("people"), {
-                primaryColumns: ["Name", "Title"],
-                imageColumn: "PhotoUrl",
-                removeNodeEvent: removeNodeEventHandler,
-                updateNodeEvent: updateNodeEventHandler,
-                insertNodeEvent: insertNodeEventHandler,
-                dataSource: data
-            });
+        var orgChart = new getOrgChart(document.getElementById("people"), {
+            primaryFields: ["Name", "Title"],
+            photoFields: ["PhotoUrl"],
+            idField: "Id",
+            parentIdField: "ParentId",
+            updatedEvent: updatedEvent
         });
 
-        function removeNodeEventHandler(sender, args) {
-            $.getJSON(removeUrl + "?id="+  args.id);
-        }
+        $.getJSON(readUrl, function (data) {
+            debugger;
+            orgChart.loadFromJSON(data);
+        });
 
-        function updateNodeEventHandler(sender, args) {
-            var postData = $.extend(true, { Id: args.node.id, ParentId: args.node.pid }, args.node.data);
-            var params = $.param(postData);
-            $.getJSON(updateUrl + "?" + params);
-        }
-
-        function insertNodeEventHandler(sender, args) {
-            var id = "1";
-            while (orgChart.nodes[id]) {
-                id++;
+        function updatedEvent(sender, args) {
+            var model = [];
+            for (var id in orgChart.nodes) {
+                var node = orgChart.nodes[id];
+                var data = $.extend(true, { Id: node.id, ParentId: node.pid }, node.data);
+                model.push(data);
             }
-            var postData = $.extend(true, { Id: id, ParentId: args.node.pid }, args.node.data);
-            var params = $.param(postData);
-            $.getJSON(insertUrl + "?" + params);
+
+            var model = JSON.stringify({ 'model': model });
+
+            $.ajax({
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                type: 'POST',
+                url: updateUrl,
+                data: model
+            });
         }
     </script>
 

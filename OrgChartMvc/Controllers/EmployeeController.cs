@@ -13,7 +13,6 @@ namespace OrgChartMvc.Controllers
         
         public ActionResult Index()
         {
-
             return View();
         }
 
@@ -21,34 +20,34 @@ namespace OrgChartMvc.Controllers
         {
             var employees = context.Employees.ToList();
             return Json(employees, JsonRequestBehavior.AllowGet);
-        }
+        }       
 
-        public EmptyResult Remove(int id)
+        public EmptyResult Update(List<Employee> model)
         {
-            var employee = context.Employees.First(p => p.Id == id);
-            context.Employees.Remove(employee);
-            context.SaveChanges();
+            foreach (var employeeModel in model)
+            {
+                var employee = context.Employees.FirstOrDefault(p => p.Id == employeeModel.Id);
 
-            return new EmptyResult();
-        }
+                if (employee == null)
+                {
+                    employee = new Employee();
+                    context.Employees.Add(employee);
+                }
 
-        public EmptyResult Insert(Employee model)
-        {
-            context.Employees.Add(model);
-            context.SaveChanges();
+                employee.Id = employeeModel.Id;
+                employee.ParentId = employeeModel.ParentId;
+                employee.Name = employeeModel.Name;
+                employee.Title = employeeModel.Title;
+                employee.PhotoUrl = employeeModel.PhotoUrl;
+            }
 
-            return new EmptyResult();
-        }
+            var modelIds = model.Select(p => p.Id);
+            var removeEmployees = context.Employees.Where(p => !modelIds.Contains(p.Id));
 
-        public EmptyResult Update(Employee model)
-        {
-            var employee = context.Employees.First(p => p.Id == model.Id);
+            foreach (var employee in removeEmployees) {
+                context.Employees.Remove(employee);
+            }
 
-            employee.Name = model.Name;
-            employee.ParentId = model.ParentId;
-            employee.PhotoUrl = model.PhotoUrl;
-            employee.Title = model.Title;
-            
             context.SaveChanges();
 
             return new EmptyResult();
@@ -60,24 +59,24 @@ namespace OrgChartMvc.Controllers
             {
                 context.Employees.Add(new Employee()
                 {
-                    Id = 1,
-                    ParentId = 0,
+                    Id = "1",
+                    ParentId = "",
                     Name = "Name 1",
                     Title = "Title 1",
                     PhotoUrl = "/Images/img.jpg"
                 });
                 context.Employees.Add(new Employee()
                 {
-                    Id = 2,
-                    ParentId = 1,
+                    Id = "2",
+                    ParentId = "1",
                     Name = "Name 2",
                     Title = "Title 2",
                     PhotoUrl = "/Images/img.jpg"
                 });
                 context.Employees.Add(new Employee()
                 {
-                    Id = 3,
-                    ParentId = 1,
+                    Id = "3",
+                    ParentId = "1",
                     Name = "Name 3",
                     Title = "Title 3",
                     PhotoUrl = "/Images/img.jpg"

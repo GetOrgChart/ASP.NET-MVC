@@ -1,5 +1,5 @@
 ﻿www.getorgchart.com
-GetOrgChart version 2.0.3
+GetOrgChart version 2.0.6
 
 Installation:
 	In your html document between the head tags include the following code, and then GetOrgChart will be installed:
